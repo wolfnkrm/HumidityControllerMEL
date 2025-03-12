@@ -4,6 +4,7 @@ Dedicated to Materials Electrochemistry Laboratory (MEL)
 Institut Teknologi Bandung
 Engineer: Faiq Haidar Hamid (23722016) & Anargya Adyatma Satria Pinandita (13720050)
 Contacts: dahaidar22@gmail.com & anargya.adyatma@gmail.com
+Note: Ganti nilai humidity ke yang diinginkan di line 35
 --------------------------------------------------------------------------------------
 */
 #include <Wire.h>
@@ -13,15 +14,15 @@ Contacts: dahaidar22@gmail.com & anargya.adyatma@gmail.com
 
 // Hardware Configuration
 #define DHTPIN 4
-#define HUMIDIFIER1_PIN 15
-#define HUMIDIFIER2_PIN 14
-#define FAN1_PIN 16
-#define FAN2_PIN 17
+#define DIFFUSER1_PIN 26
+#define DRYER_PIN 25
+#define PELTIERUP_PIN 32
+#define PELTIERDOWN_PIN 33
 #define DHTTYPE DHT22
 
 // Keypad w/ PCF8574 Setup
-I2CKeyPad keypad(0x26);
-char keys[] = "D#0*C987B654A321N"; // Verified 4x4 keypad mapping
+I2CKeyPad keyPad(0x20);
+char keys[] = "D#0*C987B654A321N"; // Verified 4x4 keyPad mapping
 
 // LCD Setup
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -31,7 +32,7 @@ DHT dht(DHTPIN, DHTTYPE);
 
 // System State
 float humidity = 0, temperature = 0;
-double targetHumidity = 50.0;
+double targetHumidity = 60.0;   //<---------GANTI KE NILAI HUMIDITY YANG DIINGINKAN 
 bool setHumidityMode = false;
 int inputValue = 0, inputDigits = 0;
 bool decimalEntered = false;
@@ -44,22 +45,45 @@ unsigned long lastSensorUpdate = 0;
 const unsigned long CONTROL_INTERVAL = 2500;
 const unsigned long SENSOR_INTERVAL = 1000;
 const unsigned long DEBOUNCE_DELAY = 50;
-const float TOLERANCE = 2.5;
+const float TOLERANCE = 0.5;
+
+// Function Prototypes
+void showStartupMessage();
+void updateSensorData();
+void updateDisplay();
+void handleHumidityControl();
+void checkKeypadInput(unsigned long currentMillis);
+void enterSetMode();
+void handleHumiditySetting(unsigned long currentMillis);
+void handleNumericInput(char key);
+void handleDecimal();
+void handleBackspace();
+void updateInputDisplay();
+void confirmHumidity();
+void cancelHumiditySet();
+void exitSetMode();
+void setRelays(bool hum1, bool hum2, bool fan1, bool fan2);
+void allRelaysOff();
 
 void setup() {
   Serial.begin(115200);
   
   // Initialize Relays
-  pinMode(HUMIDIFIER1_PIN, OUTPUT);
-  pinMode(HUMIDIFIER2_PIN, OUTPUT);
-  pinMode(FAN1_PIN, OUTPUT);
-  pinMode(FAN2_PIN, OUTPUT);
+  pinMode(DIFFUSER1_PIN, OUTPUT);
+  pinMode(DRYER_PIN, OUTPUT);
+  pinMode(PELTIERUP_PIN, OUTPUT);
+  pinMode(PELTIERDOWN_PIN, OUTPUT);
   allRelaysOff();
   
   // Initialize Sensors
   dht.begin();
-  keypad.begin();
-  
+  /*keyPad.begin();
+  if (keyPad.begin() == false)
+  {
+    Serial.println("\nERROR: cannot communicate to keyPad.\nPlease reboot.\n");
+    while(1);
+  }
+  */
   // Initialize LCD
   lcd.init();
   lcd.backlight();
@@ -70,7 +94,7 @@ void loop() {
   unsigned long currentMillis = millis();
   
   if (setHumidityMode) {
-    handleHumiditySetting(currentMillis);
+    //handleHumiditySetting(currentMillis);
   } else {
     if (currentMillis - lastSensorUpdate >= SENSOR_INTERVAL) {
       updateSensorData();
@@ -80,11 +104,13 @@ void loop() {
       handleHumidityControl();
       lastControlTime = currentMillis;
     }
-    checkKeypadInput(currentMillis);
+    //checkKeypadInput(currentMillis);
   }
 }
 
+
 void showStartupMessage() {
+  lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Humidity Control");
   lcd.setCursor(0, 1);
@@ -102,6 +128,10 @@ void updateSensorData() {
     lcd.print("Sensor Error!   ");
     lcd.setCursor(0, 1);
     lcd.print("Check DHT      ");
+    allRelaysOff();
+    //humidity = plHumidity;
+    //temperature = plTemp;
+    //updateDisplay();
     return;
   }
   
@@ -120,7 +150,7 @@ void updateDisplay() {
   
   // Line 2: Target humidity
   lcd.setCursor(0, 1);
-  lcd.print("Target:");
+  lcd.print("  Target:");
   lcd.print(targetHumidity, 1);
   lcd.print("% ");
   if (setHumidityMode) lcd.print("<SET>");
@@ -129,29 +159,29 @@ void updateDisplay() {
 void handleHumidityControl() {
   if (humidity < targetHumidity - TOLERANCE) {
     // Below target: Both humidifiers + Fan1 ON
-    digitalWrite(HUMIDIFIER1_PIN, HIGH);
-    digitalWrite(HUMIDIFIER2_PIN, HIGH);
-    digitalWrite(FAN1_PIN, HIGH);
-    digitalWrite(FAN2_PIN, LOW);
+    digitalWrite(DIFFUSER1_PIN, LOW);
+    digitalWrite(DRYER_PIN, HIGH);
+    digitalWrite(PELTIERUP_PIN, HIGH);
+    digitalWrite(PELTIERDOWN_PIN, HIGH);
   } else if (humidity > targetHumidity + TOLERANCE) {
     // Above target: Both fans ON
-    digitalWrite(HUMIDIFIER1_PIN, LOW);
-    digitalWrite(HUMIDIFIER2_PIN, LOW);
-    digitalWrite(FAN1_PIN, HIGH);
-    digitalWrite(FAN2_PIN, HIGH);
+    digitalWrite(DIFFUSER1_PIN, HIGH);
+    digitalWrite(DRYER_PIN, LOW);
+    digitalWrite(PELTIERUP_PIN, LOW);
+    digitalWrite(PELTIERDOWN_PIN, LOW);
   } else {
     // Within range: One humidifier + Fan1 ON
-    digitalWrite(HUMIDIFIER1_PIN, HIGH);
-    digitalWrite(HUMIDIFIER2_PIN, LOW);
-    digitalWrite(FAN1_PIN, HIGH);
-    digitalWrite(FAN2_PIN, LOW);
+    digitalWrite(DIFFUSER1_PIN, LOW);
+    digitalWrite(DRYER_PIN, HIGH);
+    digitalWrite(PELTIERUP_PIN, LOW);
+    digitalWrite(PELTIERDOWN_PIN, LOW);
   }
 }
-
+/*
 void checkKeypadInput(unsigned long currentMillis) {
   if (currentMillis - lastKeyTime < DEBOUNCE_DELAY) return;
   
-  char key = keypad.getKey();
+  char key = keyPad.getKey();
   if (key == 'A') {
     enterSetMode();
     lastKeyTime = currentMillis;
@@ -172,7 +202,7 @@ void enterSetMode() {
 void handleHumiditySetting(unsigned long currentMillis) {
   if (currentMillis - lastKeyTime < DEBOUNCE_DELAY) return;
   
-  char key = keypad.getKey();
+  char key = keyPad.getKey();
   if (!key) return;
   lastKeyTime = currentMillis;
 
@@ -250,10 +280,12 @@ void exitSetMode() {
   setHumidityMode = false;
   lcd.clear();
 }
-
+*/
 void allRelaysOff() {
-  digitalWrite(HUMIDIFIER1_PIN, LOW);
-  digitalWrite(HUMIDIFIER2_PIN, LOW);
-  digitalWrite(FAN1_PIN, LOW);
-  digitalWrite(FAN2_PIN, LOW);
+  digitalWrite(DIFFUSER1_PIN, HIGH);
+  digitalWrite(DRYER_PIN, HIGH);
+  digitalWrite(PELTIERUP_PIN, HIGH);
+  digitalWrite(PELTIERDOWN_PIN, HIGH);
 }
+
+//--END OF FILE--
