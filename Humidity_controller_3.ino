@@ -6,7 +6,7 @@ Engineer: Faiq Haidar Hamid (23722016) & Anargya Adyatma Satria Pinandita (13720
 Contacts: dahaidar22@gmail.com & anargya.adyatma@gmail.com
 Note: Ganti nilai humidity ke yang diinginkan di line 35
 --------------------------------------------------------------------------------------
-*/
+// Install library before first use 
 #include <Wire.h>
 #include <DHT.h>
 #include <LiquidCrystal_I2C.h>
