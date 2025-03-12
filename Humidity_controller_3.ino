@@ -21,8 +21,8 @@ Note: Ganti nilai humidity ke yang diinginkan di line 35
 #define DHTTYPE DHT22
 
 // Keypad w/ PCF8574 Setup
-I2CKeyPad keyPad(0x20);
-char keys[] = "D#0*C987B654A321N"; // Verified 4x4 keyPad mapping
+//I2CKeyPad keyPad(0x20);
+//char keys[] = "D#0*C987B654A321N"; // Verified 4x4 keyPad mapping
 
 // LCD Setup
 LiquidCrystal_I2C lcd(0x27, 16, 2);
