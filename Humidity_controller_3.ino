@@ -52,6 +52,7 @@ void showStartupMessage();
 void updateSensorData();
 void updateDisplay();
 void handleHumidityControl();
+/*
 void checkKeypadInput(unsigned long currentMillis);
 void enterSetMode();
 void handleHumiditySetting(unsigned long currentMillis);
@@ -63,6 +64,7 @@ void confirmHumidity();
 void cancelHumiditySet();
 void exitSetMode();
 void setRelays(bool hum1, bool hum2, bool fan1, bool fan2);
+*/
 void allRelaysOff();
 
 void setup() {
@@ -158,19 +160,19 @@ void updateDisplay() {
 
 void handleHumidityControl() {
   if (humidity < targetHumidity - TOLERANCE) {
-    // Below target: Both humidifiers + Fan1 ON
+    // Below target: Diffuser ON
     digitalWrite(DIFFUSER1_PIN, LOW);
     digitalWrite(DRYER_PIN, HIGH);
     digitalWrite(PELTIERUP_PIN, HIGH);
     digitalWrite(PELTIERDOWN_PIN, HIGH);
   } else if (humidity > targetHumidity + TOLERANCE) {
-    // Above target: Both fans ON
+    // Above target: Both Peltier and Dryer ON
     digitalWrite(DIFFUSER1_PIN, HIGH);
     digitalWrite(DRYER_PIN, LOW);
     digitalWrite(PELTIERUP_PIN, LOW);
     digitalWrite(PELTIERDOWN_PIN, LOW);
   } else {
-    // Within range: One humidifier + Fan1 ON
+    // Within range: Both Diffuser and Peltier ON
     digitalWrite(DIFFUSER1_PIN, LOW);
     digitalWrite(DRYER_PIN, HIGH);
     digitalWrite(PELTIERUP_PIN, LOW);
