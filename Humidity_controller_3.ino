@@ -10,7 +10,7 @@ Note: Ganti nilai humidity ke yang diinginkan di line 35
 #include <Wire.h>
 #include <DHT.h>
 #include <LiquidCrystal_I2C.h>
-#include <I2CKeyPad.h>
+//#include <I2CKeyPad.h>
 
 // Hardware Configuration
 #define DHTPIN 4
