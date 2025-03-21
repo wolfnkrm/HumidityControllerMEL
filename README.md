@@ -4,7 +4,7 @@ ESP32 code for humidity controller setup in MEL ITB
 --ID--
 
 Sebelum menggunakan kode ini untuk humidity controller lab, pastikan anda sudah memiliki prasyarat berikut:
-1. Sudah mendownload dan instal Arduino IDE terbaru (arduino 2.X.X). Jika belum, anda dapat menonton video ini https://youtu.be/D0A_-cUyghA
+1. Sudah mendownload dan instal Arduino IDE terbaru (arduino 2.X.X). Jika belum, anda dapat mendownload di link berikut https://www.arduino.cc/en/software dan menonton video ini https://youtu.be/D0A_-cUyghA
 2. Sudah menginstal library yang diperlukan (liquidcrystal I2C by Frank de  Brabander & DHT sensor library by Adafruit)
 3. Setup preferensi esp32 di arduino IDE melalui **file-> Preferences-> Settings-> Pada kolom "Additional boards manager" paste-kan link berikut** https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json -> Klik OK
 
