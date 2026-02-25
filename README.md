@@ -10,7 +10,7 @@ Sebelum menggunakan kode ini untuk humidity controller lab, pastikan anda sudah 
 
 Cara set humidity controller:
 1. Pastikan semua power dari **steker OFF**
-2. Buka kode Humidity_controller_3 di arduino IDE
+2. Buka kode Humidity_controller_3_ex di arduino IDE
 3. Pada menu **"Select Board"** di bagian atas IDE, pastikan terbaca **ESP32 Dev Module** dan port yang terbaca sudah benar
 4. Pada line 36 atau bagian targetHumidity, ubah angka ke nilai humiditas yang diinginkan
 5. Klik verify atau lambang centang pada bagian pojok kiri atas dari IDE
